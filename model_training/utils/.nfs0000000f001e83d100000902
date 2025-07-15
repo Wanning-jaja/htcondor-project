@@ -1,0 +1,6 @@
+Starting runtime_stats at mar jul 15 21:15:37 CEST 2025
+Runtime distribution statistics have been saved: /home/master/wzheng/projects/model_training/reports/runtime_distribution_stats.csv
+Runtime distribution image has been saved: /home/master/wzheng/projects/model_training/reports/avg_runtime_per_bucket.png
+Runtime errorbar image saved: /home/master/wzheng/projects/model_training/reports/runtime_errorbar_per_bucket.png
+Runtime triplet bar image saved: /home/master/wzheng/projects/model_training/reports/runtime_triplet_bar_per_bucket.png
+runtime_stats finished at mar jul 15 21:15:53 CEST 2025

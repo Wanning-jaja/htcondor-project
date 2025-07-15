@@ -1,0 +1,24 @@
+slurmstepd: error: *** JOB 54558 ON clus07 CANCELLED AT 2025-06-03T17:35:02 ***
+slurmstepd: error: *** JOB 54557 ON clus07 CANCELLED AT 2025-06-03T17:35:02 ***
+slurmstepd: error: *** JOB 54556 ON clus07 CANCELLED AT 2025-06-03T17:35:02 ***
+slurmstepd: error: *** JOB 54554 ON clus07 CANCELLED AT 2025-06-03T17:35:02 ***
+slurmstepd: error: *** JOB 54552 ON clus07 CANCELLED AT 2025-06-03T17:35:02 ***
+slurmstepd: error: *** JOB 54555 ON clus07 CANCELLED AT 2025-06-03T17:35:02 ***
+slurmstepd: error: *** JOB 54553 ON clus07 CANCELLED AT 2025-06-03T17:35:02 ***
+slurmstepd: error: *** JOB 54559 ON clus07 CANCELLED AT 2025-06-03T17:35:02 ***
+slurmstepd: error: *** JOB 54558 STEPD TERMINATED ON clus07 AT 2025-06-03T17:36:02 DUE TO JOB NOT ENDING WITH SIGNALS ***
+slurmstepd: error: *** JOB 54557 STEPD TERMINATED ON clus07 AT 2025-06-03T17:36:02 DUE TO JOB NOT ENDING WITH SIGNALS ***
+slurmstepd: error: *** JOB 54553 STEPD TERMINATED ON clus07 AT 2025-06-03T17:36:03 DUE TO JOB NOT ENDING WITH SIGNALS ***
+slurmstepd: error: *** JOB 54556 STEPD TERMINATED ON clus07 AT 2025-06-03T17:36:03 DUE TO JOB NOT ENDING WITH SIGNALS ***
+slurmstepd: error: *** JOB 54559 STEPD TERMINATEDslurmstepd: error: *** JOB 54552 STEPD TERMINATED ON clus07 AT 2025-06-03T17:36:03 DUE TO JOB NOT ENDING WITH SIGNALS ***
+slurmstepd: error: *** JOB 54555 STEPD TERMINATED ON clus07 AT 2025-06-03T17:36:03 DUE TO JOB NOT ENDING WITH SIGNALS ***
+slurmstepd: error: *** JOB 54554 STEPD TERMINATED ON clus07 AT 2025-06-03T17:36:03 DUE TO JOB NOT ENDING WITH SIGNALS ***
+ ON clus07 AT 2025-06-03T17:36:03 DUE TO JOB NOT ENDING WITH SIGNALS ***
+slurmstepd: error: Container 2789598 in cgroup plugin has 1 processes, giving up after 63 sec
+slurmstepd: error: Container 2789599 in cgroup plugin has 1 processes, giving up after 63 sec
+slurmstepd: error: Container 2789594 in cgroup plugin has 1 processes, giving up after 63 sec
+slurmstepd: error: Container 2789592 in cgroup plugin has 1 processes, giving up after 63 sec
+slurmstepd: error: Container 2789595 in cgroup plugin has 1 processes, giving up after 63 sec
+slurmstepd: error: Container 2789593 in cgroup plugin has 1 processes, giving up after 63 sec
+slurmstepd: error: Container 2789596 in cgroup plugin has 1 processes, giving up after 63 sec
+slurmstepd: error: Container 2789597 in cgroup plugin has 1 processes, giving up after 63 sec

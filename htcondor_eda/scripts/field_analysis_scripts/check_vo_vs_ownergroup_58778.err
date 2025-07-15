@@ -1,0 +1,4 @@
+
+EnvironmentLocationNotFound: Not a conda environment: /home/master/wzheng/envs/eda_env
+
+slurmstepd: error: *** JOB 58778 ON clus08 CANCELLED AT 2025-07-15T17:31:45 ***

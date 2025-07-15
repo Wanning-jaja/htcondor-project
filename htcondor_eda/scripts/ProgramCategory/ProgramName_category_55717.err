@@ -1,0 +1,7 @@
+Traceback (most recent call last):
+  File "/home/master/wzheng/projects/htcondor_eda/scripts/ProgramCategory/ProgramName_category.py", line 53, in <module>
+  File "/home/master/wzheng/envs/eda_env/lib/python3.9/site-packages/pandas/core/frame.py", line 7189, in sort_values
+    k = self._get_label_or_level_values(by[0], axis=axis)
+  File "/home/master/wzheng/envs/eda_env/lib/python3.9/site-packages/pandas/core/generic.py", line 1911, in _get_label_or_level_values
+    raise KeyError(key)
+KeyError: 'count'

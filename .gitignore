@@ -1,0 +1,53 @@
+# === Python 缓存 ===
+__pycache__/
+*.pyc
+
+# === 编辑器临时文件 ===
+.ipynb_checkpoints/
+.DS_Store
+.vscode/
+.idea/
+
+# === 通用中间/数据文件（所有项目通用） ===
+*.csv
+*.feather
+*.log
+*.txt
+*.gz
+*.zip
+*.json
+*.joblib
+*.pkl
+*.out
+*.error
+*.slurm
+*.png
+*.jpg
+*.jpeg
+*.pdf
+
+# === htcondor_eda 目录下特定目录内容忽略（保留结构） ===
+htcondor_eda/results/*
+!htcondor_eda/results/.gitkeep
+!htcondor_eda/results/README.md
+
+htcondor_eda/data/*
+!htcondor_eda/data/.gitkeep
+!htcondor_eda/data/README.md
+
+# === model_training 下特定子目录内容忽略（保留结构） ===
+model_training/models/*
+!model_training/models/.gitkeep
+!model_training/models/README.md
+
+model_training/reports/*
+!model_training/reports/.gitkeep
+!model_training/reports/README.md
+
+model_training/data/*
+!model_training/data/.gitkeep
+!model_training/data/README.md
+
+# === 不上传文件记录清单文件（如 large_files_over_100MB.txt）===
+large_files_over_100MB.txt
+allfiles.txt

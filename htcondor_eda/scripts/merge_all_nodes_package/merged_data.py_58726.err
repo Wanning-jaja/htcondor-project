@@ -1,0 +1,4 @@
+Traceback (most recent call last):
+  File "/home/master/wzheng/projects/htcondor_eda/scripts/merge_all_nodes_package/merge_all_nodes_clean.py", line 26, in <module>
+    for fname in sorted(os.listdir(INPUT_DIR)):
+FileNotFoundError: [Errno 2] No such file or directory: '/home/master/wzheng/projects/htcondor_eda/results/condor_cli_extracted'

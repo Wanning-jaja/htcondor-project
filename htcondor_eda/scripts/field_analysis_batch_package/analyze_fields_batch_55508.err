@@ -1,0 +1,14 @@
+Traceback (most recent call last):
+  File "/home/master/wzheng/projects/htcondor_eda/scripts/field_analysis_batch_package/analyze_fields_batch_v2.py", line 15, in <module>
+    df = pd.read_csv(INPUT_CSV, dtype=str, keep_default_na=False)
+  File "/home/master/wzheng/envs/eda_env/lib/python3.9/site-packages/pandas/io/parsers/readers.py", line 1026, in read_csv
+    return _read(filepath_or_buffer, kwds)
+  File "/home/master/wzheng/envs/eda_env/lib/python3.9/site-packages/pandas/io/parsers/readers.py", line 620, in _read
+    parser = TextFileReader(filepath_or_buffer, **kwds)
+  File "/home/master/wzheng/envs/eda_env/lib/python3.9/site-packages/pandas/io/parsers/readers.py", line 1620, in __init__
+    self._engine = self._make_engine(f, self.engine)
+  File "/home/master/wzheng/envs/eda_env/lib/python3.9/site-packages/pandas/io/parsers/readers.py", line 1880, in _make_engine
+    self.handles = get_handle(
+  File "/home/master/wzheng/envs/eda_env/lib/python3.9/site-packages/pandas/io/common.py", line 873, in get_handle
+    handle = open(
+FileNotFoundError: [Errno 2] No such file or directory: '/home/master/wzheng/projects/htcondor_eda/results/merged_all_nodes2.csv'
