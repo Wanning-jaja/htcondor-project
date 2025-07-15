@@ -1,9 +1,0 @@
-Traceback (most recent call last):
-  File "/home/master/wzheng/projects/model_training/experiments/train_mixed_model.py", line 51, in <module>
-  File "/home/master/wzheng/.conda/envs/eda_env/lib/python3.9/site-packages/sklearn/utils/_param_validation.py", line 194, in wrapper
-    params = func_sig.bind(*args, **kwargs)
-  File "/home/master/wzheng/.conda/envs/eda_env/lib/python3.9/inspect.py", line 3045, in bind
-    return self._bind(args, kwargs)
-  File "/home/master/wzheng/.conda/envs/eda_env/lib/python3.9/inspect.py", line 3034, in _bind
-    raise TypeError(
-TypeError: got an unexpected keyword argument 'squared'

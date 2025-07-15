@@ -1,7 +1,0 @@
-Traceback (most recent call last):
-  File "/home/master/wzheng/projects/model_training/experiments/predict_mixed_model_v3.py", line 53, in <module>
-  File "/home/master/wzheng/.conda/envs/eda_env/lib/python3.9/site-packages/xgboost/sklearn.py", line 1248, in predict
-    predts = self.get_booster().inplace_predict(
-  File "/home/master/wzheng/.conda/envs/eda_env/lib/python3.9/site-packages/xgboost/core.py", line 2524, in inplace_predict
-    raise ValueError(
-ValueError: Feature shape mismatch, expected: 10, got 12
