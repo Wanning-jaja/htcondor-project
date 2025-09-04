@@ -1,9 +1,7 @@
 # -*- coding: utf-8 -*-
 
-# 时间感知的分层切分（方案 C · 加强版）— v5.4（可配置桶）
-# 只需修改 BUCKET_EDGES_MINUTES / BUCKET_LABELS 即可全局生效
-# 推荐区间方向为 [left, right)，评估、训练、预测需保持一致
-
+# 时间感知的分层切分（方案 C · 加强版）
+# ==============================================
 import os
 import json
 import numpy as np
@@ -17,17 +15,8 @@ ALL_TRAIN    = "/home/master/wzheng/projects/model_training/data/40train.csv"
 ALL_VAL      = "/home/master/wzheng/projects/model_training/data/40val.csv"
 
 COL_PID   = "ProgramID_encoded"
-COL_LABEL = "BucketLabel"     # 运行时长分桶标签（整数 0..K-1）
+COL_LABEL = "BucketLabel"     # 运行时长分桶标签（整数 0~9）
 COL_TIME  = "SubmitTime"
-
-# ===================== 桶配置（只改这两行） =====================
-# 以“分钟”为单位的边界（含 +inf 作为最后一段右边界，或省略 +inf 也行）
-# 例：6 桶（把最小桶改为 30 分钟）：[0,30,60,180,360,720, +inf)
-BUCKET_EDGES_MINUTES = [0, 30, 60, 180, 360, 720, float("inf")]
-BUCKET_LABELS = ["<30m", "30-60m", "1-3h", "3-6h", "6-12h", ">=12h"]
-# 如果你要回到原 5 桶（<1h, 1–3h, 3–6h, 6–12h, ≥12h），改为：
-# BUCKET_EDGES_MINUTES = [0, 60, 180, 360, 720, float("inf")]
-# BUCKET_LABELS = ["<1h", "1-3h", "3-6h", "6-12h", ">=12h"]
 
 # ===================== 超参 =====================
 TEST_SIZE        = 0.20   # 验证集比例（桶内按尾部取比例）
@@ -37,24 +26,13 @@ TIME_GAP         = 0      # 可选时间净空带（与 SubmitTime 同单位），0 表示关闭
 RANDOM_STATE     = 42
 np_random = np.random.RandomState(RANDOM_STATE)
 
-# 由分钟边界自动换算成“秒”的边界（供内部使用）
-def _minutes_to_seconds_edges(min_edges):
-    edges = []
-    for m in min_edges:
-        if m == float("inf"):
-            edges.append(float("inf"))
-        else:
-            edges.append(int(m * 60))
-    return edges
-
-_BUCKET_EDGES_SEC = _minutes_to_seconds_edges(BUCKET_EDGES_MINUTES)
-
 # ===================== 工具函数 =====================
 def _time_tail_split_bucket(df_bucket: pd.DataFrame,
                             test_size: float,
                             min_per_split: int,
                             time_col: str,
                             time_gap: int = 0):
+#    """在单一 ProgramID 的单一 Bucket 内执行“按时间尾部切分”。返回 (train_df, val_df)；若样本不足以满足 min 约束，返回 None。"""
     if df_bucket.empty:
         return None
     df_bucket = df_bucket.sort_values(by=time_col).reset_index(drop=True)
@@ -91,6 +69,7 @@ def split_one_pid(df_pid: pd.DataFrame,
                   min_per_split: int,
                   time_col: str,
                   time_gap: int = 0):
+#    """对单个 ProgramID，逐桶按时间尾部切分；聚合所有桶的 train/val。任一桶无法满足 min 约束则返回 None。"""
     trains, vals = [], []
     for _, g in df_pid.groupby(label_col):
         res = _time_tail_split_bucket(g, test_size, min_per_split, time_col, time_gap)
@@ -102,24 +81,6 @@ def split_one_pid(df_pid: pd.DataFrame,
             pd.concat(vals,   ignore_index=True) if vals   else df_pid.iloc[0:0].copy())
 
 
-def _gen_bucket_label_from_seconds(sec: float) -> int:
-    
-#    将“秒”映射到整数标签（0..K-1），基于 BUCKET_EDGES_MINUTES / _BUCKET_EDGES_SEC。
-#    约定为 [left, right) 闭开区间。
-    
-    if pd.isna(sec):
-        return np.nan
-    sec = float(sec)
-    # 找到 sec 所在的区间 [edges[i], edges[i+1])
-    # 传入的 BUCKET_EDGES_MINUTES 已含 0 起点与最后 inf
-    for i in range(len(_BUCKET_EDGES_SEC) - 1):
-        left, right = _BUCKET_EDGES_SEC[i], _BUCKET_EDGES_SEC[i+1]
-        if left <= sec < right:
-            return i
-    # 容错：若没命中（只可能发生在最后一段 right = inf 情况），归入最后一桶
-    return len(_BUCKET_EDGES_SEC) - 2
-
-
 # ===================== 主流程 =====================
 if __name__ == "__main__":
     os.makedirs(OUTPUT_DIR, exist_ok=True)
@@ -128,21 +89,29 @@ if __name__ == "__main__":
     df = pd.read_csv(FEATURES_CSV)
     with open(TOPN_JSON, "r") as f:
         top_programids = set(json.load(f))
-    
-    # ==== 统一口径：无条件按当前边界重算 BucketLabel ====
-    df["RemoteWallClockTime"] = pd.to_numeric(df["RemoteWallClockTime"], errors="coerce")
-    df.drop(columns=[COL_LABEL], errors="ignore", inplace=True)   # 先丢旧列（若有）
-    df[COL_LABEL] = df["RemoteWallClockTime"].apply(_gen_bucket_label_from_seconds).astype("Int64")
 
-    # ==== 若没有 BucketLabel，就按 RemoteWallClockTime（秒）生成（可配置桶） ====
-#    if COL_LABEL not in df.columns:
- #       if "RemoteWallClockTime" not in df.columns:
-#            raise ValueError("Unable to generate BucketLabel: RemoteWallClockTime column is missing.")
-#        df["RemoteWallClockTime"] = pd.to_numeric(df["RemoteWallClockTime"], errors="coerce")
+    # ==== 若没有 BucketLabel，就按 RemoteWallClockTime（秒）生成 ====
+    if COL_LABEL not in df.columns:
+        if "RemoteWallClockTime" not in df.columns:
+            raise ValueError("Unable to generate BucketLabel: RemoteWallClockTime column is missing.")
+        df["RemoteWallClockTime"] = pd.to_numeric(df["RemoteWallClockTime"], errors="coerce")
 
-#        df[COL_LABEL] = df["RemoteWallClockTime"].apply(_gen_bucket_label_from_seconds).astype("Int64")
+        def get_bucket_label(sec):
+            if pd.isna(sec): return np.nan
+            sec = float(sec)
+            if sec < 600: return 0
+            elif sec < 1800: return 1
+            elif sec < 3600: return 2
+            elif sec < 10800: return 3
+            elif sec < 21600: return 4
+            elif sec < 43200: return 5
+
+            else: return 6
+
+        df[COL_LABEL] = df["RemoteWallClockTime"].apply(get_bucket_label).astype("Int64")
 
     # ==== 基本校验 & 类型规范化 ====
+    # 时间列转数值，去掉 SubmitTime 或 BucketLabel 缺失的行（无法分桶或排序的样本）
     df[COL_TIME] = pd.to_numeric(df[COL_TIME], errors="coerce").astype("Int64")
     for col in [COL_PID, COL_LABEL, COL_TIME]:
         if col not in df.columns:
@@ -153,7 +122,7 @@ if __name__ == "__main__":
     df = df.sort_values(by=COL_TIME).reset_index(drop=True)
 
     # TopN / Others 划分
-    is_top    = df[COL_PID].isin(top_programids)
+    is_top   = df[COL_PID].isin(top_programids)
     df_top    = df.loc[is_top].copy()
     df_others = df.loc[~is_top].copy()
 
@@ -240,9 +209,7 @@ if __name__ == "__main__":
     # 打印总体统计
     print(f" Overall: Train={len(train_all_df)} | Val={len(val_all_df)}")
     if not train_all_df.empty:
-        print("Train bucket counts:", train_all_df[COL_LABEL].value_counts().sort_index().to_dict())
+        print("Train bucket counts:", train_all_df[COL_LABEL].value_counts().to_dict())
     if not val_all_df.empty:
-        print("Val bucket counts:", val_all_df[COL_LABEL].value_counts().sort_index().to_dict())
-    print("Buckets (minutes):", BUCKET_EDGES_MINUTES)
-    print("Bucket labels:", BUCKET_LABELS)
+        print("Val bucket counts:", val_all_df[COL_LABEL].value_counts().to_dict())
     print("output path :", OUTPUT_DIR)

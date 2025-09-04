@@ -2,67 +2,91 @@
 import pandas as pd
 import numpy as np
 import os
-from sklearn.metrics import mean_squared_error, mean_absolute_error
+from sklearn.metrics import mean_absolute_error
 import matplotlib.pyplot as plt
 
 # === 路径配置 ===
-PREDICTION_FILE = "/home/master/wzheng/projects/model_training/reports/predictions_v3.csv"
-OUTPUT_CSV = "/home/master/wzheng/projects/model_training/evaluation/v3_duration_bucket_evaluation.csv"
-OUTPUT_IMG = "/home/master/wzheng/projects/model_training/evaluation/v3_duration_bucket_evaluation.png"
+PREDICTION_FILE = "/home/master/wzheng/projects/model_training/reports/predictions_v3.1.3.csv"
+OUTPUT_CSV = "/home/master/wzheng/projects/model_training/evaluation/v5_duration_bucket_evaluation.csv"
+OUTPUT_IMG = "/home/master/wzheng/projects/model_training/evaluation/v5_duration_bucket_evaluation.png"
 
 # === 加载预测数据 ===
 df = pd.read_csv(PREDICTION_FILE)
 
 # === 定义时间段（单位秒） ===
 buckets = [
-    (0, 3600, "0-1h"),
-    (3600, 14400, "1-4h"),
-    (14400, 21600, "4-6h"),
-    (21600, 86400, "6-24h"),
-    (86400, float('inf'), ">=24h")
+    (0, 600, "<10 mins"),
+    (600, 1800, "10-30 mins"),
+    (1800, 3600, "30 mins - 1 hour"),
+    (3600, 7200, "1-2 hours"),
+    (7200, 14400, "2-4 hours"),
+    (14400, 21600, "4-6 hours"),
+    (21600, 28800, "6-8 hours"),
+    (28800, 43200, "8-12 hours"),
+    (43200, 86400, "12-24 hours"),
+    (86400, float("inf"), ">=24 hours")
 ]
 
 # === 分段评估 ===
 results = []
+epsilon = 1e-8  # 防止除以0
+
 for low, high, label in buckets:
-    mask = (df["true"] > low) & (df["true"] <= high)
+    mask = (df["true"] >= low) & (df["true"] < high)
     df_bucket = df[mask]
     if len(df_bucket) == 0:
         continue
-    rmse = np.sqrt(mean_squared_error(df_bucket["true"], df_bucket["pred"]))
-    mae = mean_absolute_error(df_bucket["true"], df_bucket["pred"])
+    true = df_bucket["true"].values
+    pred = df_bucket["pred"].values
+    mae = mean_absolute_error(true, pred)
+    mape = np.mean(np.abs((true - pred) / (true + epsilon))) * 100
     results.append({
         "DurationBucket": label,
         "SampleSize": len(df_bucket),
-        "RMSE": rmse,
-        "MAE": mae
+        "MAE": mae,
+        "MAPE(%)": mape
     })
 
 # === 保存结果为 CSV ===
 results_df = pd.DataFrame(results)
 results_df.to_csv(OUTPUT_CSV, index=False)
-print(f" Segmented assessment completed and results saved to: {OUTPUT_CSV}")
+print(f"Segmented assessment completed and results saved to: {OUTPUT_CSV}")
 
-# === 可视化生成 ===
-plt.figure(figsize=(10, 6))
+# === 可视化生成（MAE 柱状图 + MAPE 折线图 + 基准线） ===
+fig, ax1 = plt.subplots(figsize=(12, 6))
+
 x = results_df["DurationBucket"]
-rmse_values = results_df["RMSE"]
-mae_values = results_df["MAE"]
-
-bar_width = 0.35
 x_pos = np.arange(len(x))
+bar_width = 0.5
 
-plt.bar(x_pos - bar_width/2, rmse_values, width=bar_width, label='RMSE', color='steelblue')
-plt.bar(x_pos + bar_width/2, mae_values, width=bar_width, label='MAE', color='orange')
+# 左轴：MAE 柱状图
+ax1.set_xlabel("Duration Bucket")
+ax1.set_ylabel("MAE (seconds)", color='steelblue')
+bar1 = ax1.bar(x_pos, results_df["MAE"], width=bar_width, label='MAE', color='steelblue')
+ax1.tick_params(axis='y', labelcolor='steelblue')
+ax1.set_xticks(x_pos)
+ax1.set_xticklabels(x, rotation=30)
 
-plt.xticks(x_pos, x)
-plt.xlabel("Duration Bucket")
-plt.ylabel("Error")
-plt.title("Evaluation by Job Duration")
-plt.legend()
-plt.tight_layout()
+# 右轴：MAPE 折线图
+ax2 = ax1.twinx()
+ax2.set_ylabel("MAPE (%)", color='orange')
+line2 = ax2.plot(x_pos, results_df["MAPE(%)"], color='orange', marker='o', label='MAPE')
+ax2.tick_params(axis='y', labelcolor='orange')
+
+# 添加基准线（可调阈值）
+ax2.axhline(y=100, color='gray', linestyle='--', linewidth=1, label='100% threshold')
+ax2.axhline(y=200, color='gray', linestyle=':', linewidth=1, label='200% threshold')
+
+# 标题和图例
+fig.tight_layout()
+plt.title("Evaluation by Job Duration (MAE + MAPE Line)")
+fig.legend(loc='upper left', bbox_to_anchor=(0.12, 0.88))
 plt.grid(axis='y', linestyle='--', alpha=0.5)
 
 # === 保存图像 ===
 plt.savefig(OUTPUT_IMG)
-print(f" The chart has been saved :{OUTPUT_IMG}")
+print(f"The chart has been saved: {OUTPUT_IMG}")
+
+# === 保存图像 ===
+plt.savefig(OUTPUT_IMG)
+print(f"The chart has been saved: {OUTPUT_IMG}")

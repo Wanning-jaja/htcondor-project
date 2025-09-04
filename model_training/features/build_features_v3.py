@@ -25,8 +25,8 @@ for col in label_cols:
     df[col + "_encoded"] = le.fit_transform(df[col])
     joblib.dump(le, os.path.join(ENCODER_DIR, f"{col}_encoder.joblib"))
 
-# === 处理 Cmd（从 ProgramID 中提取） ===
-df['Cmd'] = df['ProgramID'].astype(str).str.extract(r'([^:]+)')[0].fillna('unknown')
+# === 处理 Cmd（来自 ProgramName） ===
+df['Cmd'] = df['ProgramName'].fillna('unknown').astype(str)
 le_cmd = LabelEncoder()
 df['Cmd_encoded'] = le_cmd.fit_transform(df['Cmd'])
 joblib.dump(le_cmd, os.path.join(ENCODER_DIR, "Cmd_encoder.joblib"))
@@ -49,15 +49,16 @@ for col in numeric_cols:
 # === 目标值处理 ===
 df['RemoteWallClockTime'] = pd.to_numeric(df['RemoteWallClockTime'], errors='coerce')
 
-# === 输出最终特征集 ===
+# === 选择最终特征 ===
 model_df = df[
     [col + "_encoded" for col in label_cols] +
+    ['Cmd_encoded', 'SubmitHour', 'SubmitWeekday'] +
     [col + "_log1p" for col in numeric_cols] +
     ['SubmitTime', 'RemoteWallClockTime']
 ].copy()
 
-output_path = os.path.join(OUTPUT_DIR, "model_features_v2.csv")
+# === 输出 ===
+output_path = os.path.join(OUTPUT_DIR, "model_features_v3.csv")
 model_df.to_csv(output_path, index=False)
-
-print("Feature engineering v2 completed:", output_path)
-print("Label encoders saved to:", ENCODER_DIR)
+print("\u2714\ufe0f Features v3 saved to:", output_path)
+print("\u2714\ufe0f Encoders saved to:", ENCODER_DIR)
